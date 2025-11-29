@@ -1,0 +1,90 @@
+app:
+  name: higo-app
+  env: development
+  version: 1.0.0
+  description: Higo application example
+
+auth:
+  jwt_secret: your-secret-key-change-in-production
+  jwt_expiry: 24h
+
+server:
+  http:
+    enabled: true
+    port: ":8080"
+    mode: debug
+    read_timeout: 30s
+    write_timeout: 30s
+    enable_h2c: false
+    service_name: higo-http
+  grpc:
+    enabled: false
+    port: ":9090"
+    service_name: higo-grpc
+
+logger:
+  level: info
+  format: json
+  output_path: stdout
+
+observability:
+  metrics:
+    enabled: true
+    path: /metrics
+    port: ":9091"
+  tracing:
+    enabled: false
+    service_name: higo-app
+    exporter: otlp
+    endpoint: localhost:4317
+    sample_rate: 1.0
+
+storage:
+  enable_tracing: true
+  mysql:
+    enabled: true
+    dsn: "user:password@tcp(localhost:3306)/dbname?charset=utf8mb4&parseTime=True"
+    replicas: []
+    max_open_conns: 100
+    max_idle_conns: 10
+    conn_max_lifetime: 1h
+    log_level: 1
+  redis:
+    enabled: true
+    addr: localhost:6379
+    password: ""
+    db: 0
+    max_retries: 3
+    pool_size: 20
+    min_idle_conns: 5
+  mongodb:
+    enabled: false
+    uri: "mongodb://localhost:27017"
+    database: logs
+    max_pool_size: 100
+    min_pool_size: 10
+    connect_timeout: 10s
+  clickhouse:
+    enabled: false
+    dsn: "tcp://localhost:9000?database=default"
+    max_open_conns: 50
+    max_idle_conns: 10
+    conn_max_lifetime: 1h
+  elasticsearch:
+    enabled: false
+    addresses:
+      - http://localhost:9200
+    username: ""
+    password: ""
+
+mq:
+  kafka:
+    enabled: false
+    brokers:
+      - localhost:9092
+    client_id: higo-client
+  rabbitmq:
+    enabled: false
+    url: "amqp://guest:guest@localhost:5672/"
+    exchange_name: higo
+    exchange_type: topic

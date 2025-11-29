@@ -8,7 +8,7 @@ import (
 	"github.com/ClickHouse/clickhouse-go/v2"
 	"github.com/ClickHouse/clickhouse-go/v2/lib/driver"
 
-	"higo/storage"
+	"github.com/mildsunup/higo/storage"
 )
 
 // Config ClickHouse 配置

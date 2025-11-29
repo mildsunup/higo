@@ -12,7 +12,7 @@ import (
 	"gorm.io/plugin/dbresolver"
 	"gorm.io/plugin/opentelemetry/tracing"
 
-	"higo/storage"
+	"github.com/mildsunup/higo/storage"
 )
 
 // Config MySQL 配置

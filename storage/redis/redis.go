@@ -9,7 +9,7 @@ import (
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/otel/trace"
 
-	"higo/storage"
+	"github.com/mildsunup/higo/storage"
 )
 
 // Config Redis 配置

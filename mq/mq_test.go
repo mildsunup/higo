@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"higo/mq"
-	"higo/mq/memory"
+	"github.com/mildsunup/higo/mq"
+	"github.com/mildsunup/higo/mq/memory"
 )
 
 func TestMemoryClient_PublishSubscribe(t *testing.T) {

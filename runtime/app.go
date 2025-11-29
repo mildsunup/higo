@@ -6,7 +6,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"higo/logger"
+	"github.com/mildsunup/higo/logger"
 )
 
 // App 应用实现

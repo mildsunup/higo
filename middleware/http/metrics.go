@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"higo/observability"
+	"github.com/mildsunup/higo/observability"
 )
 
 // Metrics HTTP 指标

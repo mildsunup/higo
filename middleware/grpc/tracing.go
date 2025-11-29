@@ -15,7 +15,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const tracerName = "higo/grpc"
+const tracerName = "github.com/mildsunup/higo/grpc"
 
 // TracingConfig 追踪配置
 type TracingConfig struct {

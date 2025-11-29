@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"time"
 
-	"higo/mq"
+	"github.com/mildsunup/higo/mq"
 )
 
 // Event 领域事件接口

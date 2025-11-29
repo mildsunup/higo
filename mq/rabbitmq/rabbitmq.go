@@ -8,7 +8,7 @@ import (
 
 	amqp "github.com/rabbitmq/amqp091-go"
 
-	"higo/mq"
+	"github.com/mildsunup/higo/mq"
 )
 
 // Config RabbitMQ 配置

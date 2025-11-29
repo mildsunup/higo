@@ -9,7 +9,7 @@ import (
 
 	"github.com/google/uuid"
 
-	"higo/mq"
+	"github.com/mildsunup/higo/mq"
 )
 
 // Client 内存 MQ 客户端（用于测试和开发）

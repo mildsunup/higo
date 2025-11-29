@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"higo/observability"
+	"github.com/mildsunup/higo/observability"
 )
 
 // PoolMetrics 连接池指标

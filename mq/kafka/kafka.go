@@ -8,7 +8,7 @@ import (
 
 	"github.com/IBM/sarama"
 
-	"higo/mq"
+	"github.com/mildsunup/higo/mq"
 )
 
 // Config Kafka 配置

@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"higo/response"
+	"github.com/mildsunup/higo/response"
 )
 
 // TokenValidator Token 验证函数

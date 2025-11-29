@@ -7,14 +7,14 @@ import (
 	"go.opentelemetry.io/otel/trace"
 	"gorm.io/gorm/logger"
 
-	"higo/aop"
-	"higo/config"
-	pkglogger "higo/logger"
-	"higo/observability"
-	"higo/storage"
-	"higo/storage/mongodb"
-	"higo/storage/mysql"
-	"higo/storage/redis"
+	"github.com/mildsunup/higo/aop"
+	"github.com/mildsunup/higo/config"
+	pkglogger "github.com/mildsunup/higo/logger"
+	"github.com/mildsunup/higo/observability"
+	"github.com/mildsunup/higo/storage"
+	"github.com/mildsunup/higo/storage/mongodb"
+	"github.com/mildsunup/higo/storage/mysql"
+	"github.com/mildsunup/higo/storage/redis"
 )
 
 // ProvideLogger 提供应用日志组件

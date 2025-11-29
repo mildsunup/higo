@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"higo/logger"
+	"github.com/mildsunup/higo/logger"
 )
 
 // Recovery panic 恢复中间件

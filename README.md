@@ -255,11 +255,11 @@ package main
 
 import (
     "context"
-    "higo/runtime"
-    "higo/di"
-    "higo/config"
-    "higo/logger"
-    "higo/server"
+    "github.com/mildsunup/higo/runtime"
+    "github.com/mildsunup/higo/di"
+    "github.com/mildsunup/higo/config"
+    "github.com/mildsunup/higo/logger"
+    "github.com/mildsunup/higo/server"
 )
 
 func main() {

@@ -5,7 +5,7 @@ import (
 
 	"go.opentelemetry.io/otel/trace"
 
-	"higo/middleware"
+	"github.com/mildsunup/higo/middleware"
 )
 
 func init() {

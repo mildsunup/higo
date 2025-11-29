@@ -10,7 +10,7 @@ import (
 	"go.opentelemetry.io/contrib/instrumentation/go.mongodb.org/mongo-driver/mongo/otelmongo"
 	"go.opentelemetry.io/otel/trace"
 
-	"higo/storage"
+	"github.com/mildsunup/higo/storage"
 )
 
 // Config MongoDB 配置

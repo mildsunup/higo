@@ -11,8 +11,8 @@ import (
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
 
-	"higo/logger"
-	mw "higo/middleware"
+	"github.com/mildsunup/higo/logger"
+	mw "github.com/mildsunup/higo/middleware"
 )
 
 // UnaryLogging 一元调用日志拦截器

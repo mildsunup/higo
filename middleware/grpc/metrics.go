@@ -7,7 +7,7 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 
-	"higo/observability"
+	"github.com/mildsunup/higo/observability"
 )
 
 // Metrics gRPC 指标

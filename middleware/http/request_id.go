@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 	"go.opentelemetry.io/otel/trace"
 
-	mw "higo/middleware"
+	mw "github.com/mildsunup/higo/middleware"
 )
 
 const (

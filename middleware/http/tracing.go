@@ -12,7 +12,7 @@ import (
 	"go.opentelemetry.io/otel/trace"
 )
 
-const tracerName = "higo/http"
+const tracerName = "github.com/mildsunup/higo/http"
 
 // TracingConfig 追踪配置
 type TracingConfig struct {

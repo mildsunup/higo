@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"higo/idempotent"
+	"github.com/mildsunup/higo/idempotent"
 )
 
 const (

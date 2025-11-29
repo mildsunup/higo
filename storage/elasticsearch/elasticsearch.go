@@ -6,7 +6,7 @@ import (
 
 	"github.com/elastic/go-elasticsearch/v8"
 
-	"higo/storage"
+	"github.com/mildsunup/higo/storage"
 )
 
 // Config Elasticsearch 配置

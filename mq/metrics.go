@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"higo/observability"
+	"github.com/mildsunup/higo/observability"
 )
 
 // Metrics MQ 指标

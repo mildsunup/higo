@@ -4,7 +4,7 @@ import (
 	"context"
 	"time"
 
-	"higo/logger"
+	"github.com/mildsunup/higo/logger"
 )
 
 // Component 组件接口

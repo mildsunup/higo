@@ -9,7 +9,7 @@ import (
 	"errors"
 	"time"
 
-	"higo/cache"
+	"github.com/mildsunup/higo/cache"
 )
 
 var (

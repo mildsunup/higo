@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"higo/logger"
+	"github.com/mildsunup/higo/logger"
 )
 
 // Logging 日志中间件

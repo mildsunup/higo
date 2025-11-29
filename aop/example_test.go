@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"higo/aop"
+	"github.com/mildsunup/higo/aop"
 )
 
 // UserService 示例服务

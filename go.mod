@@ -1,4 +1,4 @@
-module higo
+module github.com/mildsunup/higo
 
 go 1.25.3
 

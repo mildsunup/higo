@@ -79,11 +79,12 @@ func ProvideMySQL(cfg *config.Config, tp trace.TracerProvider) *mysql.Storage {
 		Replicas:        cfg.Storage.MySQL.Replicas,
 	}
 
+	var opts []mysql.Option
 	if cfg.Storage.EnableTracing {
-		mysqlConfig.Tracer = tp
+		opts = append(opts, mysql.WithTracer(tp))
 	}
 
-	return mysql.New(mysqlConfig)
+	return mysql.New(mysqlConfig, opts...)
 }
 
 // ProvideRedis provides Redis storage instance
@@ -102,11 +103,12 @@ func ProvideRedis(cfg *config.Config, tp trace.TracerProvider) *redis.Storage {
 		MinIdleConns: cfg.Storage.Redis.MinIdleConns,
 	}
 
+	var opts []redis.Option
 	if cfg.Storage.EnableTracing {
-		redisConfig.Tracer = tp
+		opts = append(opts, redis.WithTracer(tp))
 	}
 
-	return redis.New(redisConfig)
+	return redis.New(redisConfig, opts...)
 }
 
 // ProvideMongoDB provides MongoDB storage instance
@@ -124,11 +126,12 @@ func ProvideMongoDB(cfg *config.Config, tp trace.TracerProvider) *mongodb.Storag
 		ConnectTimeout: time.Duration(cfg.Storage.MongoDB.ConnectTimeout) * time.Second,
 	}
 
+	var opts []mongodb.Option
 	if cfg.Storage.EnableTracing {
-		mongoConfig.Tracer = tp
+		opts = append(opts, mongodb.WithTracer(tp))
 	}
 
-	return mongodb.New(mongoConfig)
+	return mongodb.New(mongoConfig, opts...)
 }
 
 // ProvideStorageMetrics provides storage metrics

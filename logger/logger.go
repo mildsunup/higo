@@ -24,8 +24,18 @@ type zapLogger struct {
 	extractors []ContextExtractor
 }
 
+// Option 日志选项
+type Option func(*zapLogger)
+
+// WithExtractors 设置 context 提取器
+func WithExtractors(extractors ...ContextExtractor) Option {
+	return func(l *zapLogger) {
+		l.extractors = append(l.extractors, extractors...)
+	}
+}
+
 // New 创建 Logger
-func New(cfg Config) (Logger, error) {
+func New(cfg Config, opts ...Option) (Logger, error) {
 	level := zap.NewAtomicLevelAt(toZapLevel(ParseLevel(cfg.Level)))
 
 	encCfg := zap.NewProductionEncoderConfig()
@@ -43,16 +53,22 @@ func New(cfg Config) (Logger, error) {
 	writer := buildWriter(cfg)
 	core := zapcore.NewCore(encoder, writer, level)
 
-	opts := []zap.Option{}
+	zapOpts := []zap.Option{}
 	if cfg.AddCaller {
-		opts = append(opts, zap.AddCaller(), zap.AddCallerSkip(cfg.CallerSkip))
+		zapOpts = append(zapOpts, zap.AddCaller(), zap.AddCallerSkip(cfg.CallerSkip))
 	}
 
-	return &zapLogger{
-		base:       zap.New(core, opts...),
+	l := &zapLogger{
+		base:       zap.New(core, zapOpts...),
 		level:      level,
 		extractors: contextExtractors,
-	}, nil
+	}
+
+	for _, opt := range opts {
+		opt(l)
+	}
+
+	return l, nil
 }
 
 func (l *zapLogger) Debug(ctx context.Context, msg string, fields ...Field) {
@@ -212,15 +228,15 @@ func toZapFields(fields []Field) []zap.Field {
 	return result
 }
 
-// Noop 返回空实现
-func Noop() Logger { return &noopLogger{} }
+// Nop 返回空实现
+func Nop() Logger { return &nopLogger{} }
 
-type noopLogger struct{}
+type nopLogger struct{}
 
-func (l *noopLogger) Debug(ctx context.Context, msg string, fields ...Field) {}
-func (l *noopLogger) Info(ctx context.Context, msg string, fields ...Field)  {}
-func (l *noopLogger) Warn(ctx context.Context, msg string, fields ...Field)  {}
-func (l *noopLogger) Error(ctx context.Context, msg string, fields ...Field) {}
-func (l *noopLogger) With(fields ...Field) Logger                            { return l }
-func (l *noopLogger) WithLevel(level Level) Logger                           { return l }
-func (l *noopLogger) Sync() error                                            { return nil }
+func (l *nopLogger) Debug(ctx context.Context, msg string, fields ...Field) {}
+func (l *nopLogger) Info(ctx context.Context, msg string, fields ...Field)  {}
+func (l *nopLogger) Warn(ctx context.Context, msg string, fields ...Field)  {}
+func (l *nopLogger) Error(ctx context.Context, msg string, fields ...Field) {}
+func (l *nopLogger) With(fields ...Field) Logger                            { return l }
+func (l *nopLogger) WithLevel(level Level) Logger                           { return l }
+func (l *nopLogger) Sync() error                                            { return nil }

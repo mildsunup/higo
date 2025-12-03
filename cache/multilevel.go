@@ -38,7 +38,7 @@ func NewMultiLevel(cfg MultiLevelConfig, opts ...Option) *MultiLevel {
 	}
 }
 
-// NewMultiLevelCache 便捷构造器（兼容旧接口）
+// NewMultiLevelCache 便捷构造器
 func NewMultiLevelCache(redisAddr, password string, db int) (*MultiLevel, error) {
 	l1, err := NewMemory(DefaultMemoryConfig())
 	if err != nil {

@@ -267,10 +267,10 @@ func main() {
     cfg := config.MustLoad("config.yaml")
     
     // 2. 初始化日志
-    log := logger.New(cfg.Logger)
+    log, _ := logger.New(cfg.Logger)
     
-    // 3. 创建应用
-    app := runtime.New(cfg.App, log)
+    // 3. 创建应用（使用选项模式）
+    app := runtime.New(cfg.App, runtime.WithLogger(log))
     
     // 4. 创建 DI 容器
     container := di.NewContainer()

@@ -24,9 +24,25 @@ type App struct {
 	mu    sync.Mutex
 }
 
+// Option 应用选项
+type Option func(*App)
+
+// WithLogger 设置日志
+func WithLogger(log Logger) Option {
+	return func(a *App) {
+		a.log = log
+	}
+}
+
 // New 创建应用
-func New(cfg Config, log Logger) *App {
-	app := &App{cfg: cfg, log: log}
+func New(cfg Config, opts ...Option) *App {
+	app := &App{
+		cfg: cfg,
+		log: logger.Nop(), // 默认空日志，避免 nil 判断
+	}
+	for _, opt := range opts {
+		opt(app)
+	}
 	app.state.Store(int32(StateCreated))
 	return app
 }
@@ -55,9 +71,7 @@ func (a *App) State() State { return State(a.state.Load()) }
 
 func (a *App) setState(s State) {
 	old := State(a.state.Swap(int32(s)))
-	if a.log != nil {
-		a.log.Info(nil, "app state changed", logger.String("from", old.String()), logger.String("to", s.String()))
-	}
+	a.log.Info(nil, "app state changed", logger.String("from", old.String()), logger.String("to", s.String()))
 }
 
 // Start 启动应用
@@ -86,9 +100,7 @@ func (a *App) Start(ctx context.Context) error {
 	// 启动组件
 	for i := range a.components {
 		c := &a.components[i]
-		if a.log != nil {
-			a.log.Info(ctx, "starting component", logger.String("name", c.component.Name()))
-		}
+		a.log.Info(ctx, "starting component", logger.String("name", c.component.Name()))
 
 		if err := c.component.Start(ctx); err != nil {
 			a.setState(StateFailed)
@@ -110,9 +122,7 @@ func (a *App) Start(ctx context.Context) error {
 	}
 
 	a.setState(StateRunning)
-	if a.log != nil {
-		a.log.Info(ctx, "app started", logger.String("name", a.cfg.Name))
-	}
+	a.log.Info(ctx, "app started", logger.String("name", a.cfg.Name))
 	return nil
 }
 
@@ -138,9 +148,7 @@ func (a *App) Stop(ctx context.Context) error {
 	}
 
 	a.setState(StateStopped)
-	if a.log != nil {
-		a.log.Info(ctx, "app stopped", logger.String("name", a.cfg.Name))
-	}
+	a.log.Info(ctx, "app stopped", logger.String("name", a.cfg.Name))
 	return nil
 }
 
@@ -152,14 +160,10 @@ func (a *App) stopStarted(ctx context.Context) {
 			continue
 		}
 
-		if a.log != nil {
-			a.log.Info(ctx, "stopping component", logger.String("name", c.component.Name()))
-		}
+		a.log.Info(ctx, "stopping component", logger.String("name", c.component.Name()))
 
 		if err := c.component.Stop(ctx); err != nil {
-			if a.log != nil {
-				a.log.Error(ctx, "component stop failed", logger.String("name", c.component.Name()), logger.Err(err))
-			}
+			a.log.Error(ctx, "component stop failed", logger.String("name", c.component.Name()), logger.Err(err))
 		}
 		c.started = false
 	}
@@ -173,9 +177,7 @@ func (a *App) Run(ctx context.Context) error {
 
 	// 等待信号
 	sig := WaitSignal(ctx)
-	if a.log != nil {
-		a.log.Info(ctx, "received signal", logger.String("signal", sig.String()))
-	}
+	a.log.Info(ctx, "received signal", logger.String("signal", sig.String()))
 
 	// 带超时停止
 	stopCtx, cancel := context.WithTimeout(context.Background(), a.cfg.ShutdownTimeout)

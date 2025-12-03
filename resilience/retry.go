@@ -10,12 +10,61 @@ type Retry struct {
 	cfg RetryConfig
 }
 
-// NewRetry 创建重试执行器
-func NewRetry(cfg RetryConfig) *Retry {
-	if cfg.RetryIf == nil {
-		cfg.RetryIf = func(err error) bool { return err != nil }
+// RetryOption 重试选项
+type RetryOption func(*Retry)
+
+// WithMaxAttempts 设置最大重试次数
+func WithMaxAttempts(attempts int) RetryOption {
+	return func(r *Retry) {
+		r.cfg.MaxAttempts = attempts
 	}
-	return &Retry{cfg: cfg}
+}
+
+// WithDelay 设置初始延迟
+func WithDelay(delay time.Duration) RetryOption {
+	return func(r *Retry) {
+		r.cfg.Delay = delay
+	}
+}
+
+// WithMaxDelay 设置最大延迟
+func WithMaxDelay(maxDelay time.Duration) RetryOption {
+	return func(r *Retry) {
+		r.cfg.MaxDelay = maxDelay
+	}
+}
+
+// WithMultiplier 设置延迟倍数
+func WithMultiplier(multiplier float64) RetryOption {
+	return func(r *Retry) {
+		r.cfg.Multiplier = multiplier
+	}
+}
+
+// WithRetryIf 设置重试条件
+func WithRetryIf(fn func(error) bool) RetryOption {
+	return func(r *Retry) {
+		r.cfg.RetryIf = fn
+	}
+}
+
+// NewRetry 创建重试执行器
+func NewRetry(opts ...RetryOption) *Retry {
+	r := &Retry{
+		cfg: RetryConfig{
+			MaxAttempts: 3,
+			Delay:       100 * time.Millisecond,
+			MaxDelay:    5 * time.Second,
+			Multiplier:  2.0,
+			RetryIf:     func(err error) bool { return err != nil },
+		},
+	}
+
+	for _, opt := range opts {
+		opt(r)
+	}
+
+	return r
 }
 
 func (r *Retry) Execute(ctx context.Context, fn func(context.Context) error) error {

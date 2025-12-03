@@ -56,10 +56,52 @@ type CircuitBreaker struct {
 	mu          sync.Mutex
 }
 
+// CircuitBreakerOption 熔断器选项
+type CircuitBreakerOption func(*CircuitBreaker)
+
+// WithFailureThreshold 设置失败阈值
+func WithFailureThreshold(threshold int) CircuitBreakerOption {
+	return func(cb *CircuitBreaker) {
+		cb.cfg.FailureThreshold = threshold
+	}
+}
+
+// WithSuccessThreshold 设置成功阈值
+func WithSuccessThreshold(threshold int) CircuitBreakerOption {
+	return func(cb *CircuitBreaker) {
+		cb.cfg.SuccessThreshold = threshold
+	}
+}
+
+// WithTimeout 设置超时时间
+func WithTimeout(timeout time.Duration) CircuitBreakerOption {
+	return func(cb *CircuitBreaker) {
+		cb.cfg.Timeout = timeout
+	}
+}
+
+// WithStateChangeHandler 设置状态变更回调
+func WithStateChangeHandler(handler func(from, to CircuitState)) CircuitBreakerOption {
+	return func(cb *CircuitBreaker) {
+		cb.cfg.OnStateChange = handler
+	}
+}
+
 // NewCircuitBreaker 创建熔断器
-func NewCircuitBreaker(cfg CircuitBreakerConfig) *CircuitBreaker {
-	cb := &CircuitBreaker{cfg: cfg}
+func NewCircuitBreaker(opts ...CircuitBreakerOption) *CircuitBreaker {
+	cb := &CircuitBreaker{
+		cfg: CircuitBreakerConfig{
+			FailureThreshold: 5,
+			SuccessThreshold: 2,
+			Timeout:          30 * time.Second,
+		},
+	}
 	cb.state.Store(int32(CircuitClosed))
+
+	for _, opt := range opts {
+		opt(cb)
+	}
+
 	return cb
 }
 

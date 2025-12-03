@@ -49,12 +49,44 @@ type Bus struct {
 	config   Config
 }
 
-// New 创建事件总线
-func New(producer mq.Producer, cfg Config) *Bus {
-	if cfg.Topic == "" {
-		cfg.Topic = "domain-events"
+// Option 事件总线选项
+type Option func(*Bus)
+
+// WithTopic 设置默认主题
+func WithTopic(topic string) Option {
+	return func(b *Bus) {
+		b.config.Topic = topic
 	}
-	return &Bus{producer: producer, config: cfg}
+}
+
+// WithIDFunc 设置 ID 生成函数
+func WithIDFunc(fn func() string) Option {
+	return func(b *Bus) {
+		b.config.IDFunc = fn
+	}
+}
+
+// WithTopicFunc 设置主题路由函数
+func WithTopicFunc(fn func(Event) string) Option {
+	return func(b *Bus) {
+		b.config.TopicFunc = fn
+	}
+}
+
+// New 创建事件总线
+func New(producer mq.Producer, opts ...Option) *Bus {
+	b := &Bus{
+		producer: producer,
+		config: Config{
+			Topic: "domain-events",
+		},
+	}
+
+	for _, opt := range opts {
+		opt(b)
+	}
+
+	return b
 }
 
 // Publish 同步发布事件

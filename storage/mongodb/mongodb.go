@@ -21,7 +21,6 @@ type Config struct {
 	MaxPoolSize    uint64        `json:"max_pool_size" yaml:"max_pool_size"`
 	MinPoolSize    uint64        `json:"min_pool_size" yaml:"min_pool_size"`
 	ConnectTimeout time.Duration `json:"connect_timeout" yaml:"connect_timeout"`
-	Tracer         trace.TracerProvider
 }
 
 // Storage MongoDB 存储
@@ -30,18 +29,36 @@ type Storage struct {
 	client   *mongo.Client
 	database *mongo.Database
 	config   Config
+	tracer   trace.TracerProvider
+}
+
+// Option MongoDB 存储选项
+type Option func(*Storage)
+
+// WithTracer 设置追踪
+func WithTracer(tracer trace.TracerProvider) Option {
+	return func(s *Storage) {
+		s.tracer = tracer
+	}
 }
 
 // New 创建 MongoDB 存储
-func New(cfg Config) *Storage {
+func New(cfg Config, opts ...Option) *Storage {
 	name := cfg.Name
 	if name == "" {
 		name = "mongodb"
 	}
-	return &Storage{
+
+	s := &Storage{
 		Base:   storage.NewBase(name, storage.TypeMongoDB),
 		config: cfg,
 	}
+
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	return s
 }
 
 func (s *Storage) Connect(ctx context.Context) error {
@@ -65,9 +82,9 @@ func (s *Storage) Connect(ctx context.Context) error {
 	}
 
 	// OpenTelemetry 追踪
-	if s.config.Tracer != nil {
+	if s.tracer != nil {
 		opts.SetMonitor(otelmongo.NewMonitor(
-			otelmongo.WithTracerProvider(s.config.Tracer),
+			otelmongo.WithTracerProvider(s.tracer),
 		))
 	}
 

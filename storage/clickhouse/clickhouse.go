@@ -30,16 +30,26 @@ type Storage struct {
 	config Config
 }
 
+// Option ClickHouse 存储选项
+type Option func(*Storage)
+
 // New 创建 ClickHouse 存储
-func New(cfg Config) *Storage {
+func New(cfg Config, opts ...Option) *Storage {
 	name := cfg.Name
 	if name == "" {
 		name = "clickhouse"
 	}
-	return &Storage{
+
+	s := &Storage{
 		Base:   storage.NewBase(name, storage.TypeClickHouse),
 		config: cfg,
 	}
+
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	return s
 }
 
 func (s *Storage) Connect(ctx context.Context) error {

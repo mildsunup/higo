@@ -19,17 +19,45 @@ import (
 	semconv "go.opentelemetry.io/otel/semconv/v1.24.0"
 )
 
+// Logger 日志接口（最小化依赖）
+type Logger interface {
+	Info(ctx context.Context, msg string, fields ...any)
+	Error(ctx context.Context, msg string, fields ...any)
+}
+
 // Observability 可观测性管理器
 type Observability struct {
 	cfg      Config
 	tp       *sdktrace.TracerProvider
 	registry *prometheus.Registry
 	metrics  MetricsProvider
+	logger   Logger
+}
+
+// Option 可观测性选项
+type Option func(*Observability)
+
+// WithLogger 设置日志
+func WithLogger(logger Logger) Option {
+	return func(o *Observability) {
+		o.logger = logger
+	}
+}
+
+// WithRegistry 设置自定义 Prometheus Registry
+func WithRegistry(registry *prometheus.Registry) Option {
+	return func(o *Observability) {
+		o.registry = registry
+	}
 }
 
 // New 创建可观测性实例
-func New(cfg Config) (*Observability, error) {
+func New(cfg Config, opts ...Option) (*Observability, error) {
 	o := &Observability{cfg: cfg}
+
+	for _, opt := range opts {
+		opt(o)
+	}
 
 	if err := o.initTracing(); err != nil {
 		return nil, fmt.Errorf("init tracing: %w", err)

@@ -14,17 +14,16 @@ import (
 
 // Config Redis 配置
 type Config struct {
-	Name         string `json:"name" yaml:"name"`
-	Addr         string `json:"addr" yaml:"addr"`
-	Password     string `json:"password" yaml:"password"`
-	DB           int    `json:"db" yaml:"db"`
-	MaxRetries   int    `json:"max_retries" yaml:"max_retries"`
-	PoolSize     int    `json:"pool_size" yaml:"pool_size"`
-	MinIdleConns int    `json:"min_idle_conns" yaml:"min_idle_conns"`
+	Name         string        `json:"name" yaml:"name"`
+	Addr         string        `json:"addr" yaml:"addr"`
+	Password     string        `json:"password" yaml:"password"`
+	DB           int           `json:"db" yaml:"db"`
+	MaxRetries   int           `json:"max_retries" yaml:"max_retries"`
+	PoolSize     int           `json:"pool_size" yaml:"pool_size"`
+	MinIdleConns int           `json:"min_idle_conns" yaml:"min_idle_conns"`
 	DialTimeout  time.Duration `json:"dial_timeout" yaml:"dial_timeout"`
 	ReadTimeout  time.Duration `json:"read_timeout" yaml:"read_timeout"`
 	WriteTimeout time.Duration `json:"write_timeout" yaml:"write_timeout"`
-	Tracer       trace.TracerProvider
 }
 
 // Storage Redis 存储
@@ -32,18 +31,36 @@ type Storage struct {
 	*storage.Base
 	client *redis.Client
 	config Config
+	tracer trace.TracerProvider
+}
+
+// Option Redis 存储选项
+type Option func(*Storage)
+
+// WithTracer 设置追踪
+func WithTracer(tracer trace.TracerProvider) Option {
+	return func(s *Storage) {
+		s.tracer = tracer
+	}
 }
 
 // New 创建 Redis 存储
-func New(cfg Config) *Storage {
+func New(cfg Config, opts ...Option) *Storage {
 	name := cfg.Name
 	if name == "" {
 		name = "redis"
 	}
-	return &Storage{
+
+	s := &Storage{
 		Base:   storage.NewBase(name, storage.TypeRedis),
 		config: cfg,
 	}
+
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	return s
 }
 
 func (s *Storage) Connect(ctx context.Context) error {
@@ -66,9 +83,9 @@ func (s *Storage) Connect(ctx context.Context) error {
 	client := redis.NewClient(opts)
 
 	// OpenTelemetry 追踪
-	if s.config.Tracer != nil {
+	if s.tracer != nil {
 		if err := redisotel.InstrumentTracing(client,
-			redisotel.WithTracerProvider(s.config.Tracer),
+			redisotel.WithTracerProvider(s.tracer),
 		); err != nil {
 			s.SetState(storage.StateDisconnected)
 			return fmt.Errorf("redis: setup tracing failed: %w", err)

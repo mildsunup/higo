@@ -1,18 +1,27 @@
-# Binaries for programs and plugins
+# Go executables and compiled binaries
 *.exe
 *.exe~
-*.dll
-*.so
-*.dylib
-*.log
-
-# ide
-.idea/
-.vscode/
-*.test
 *.out
+*.test
+*.prof
 
-.DS_Store
-
+# Dependency directories
 vendor/
 
+# IDE and editor configurations
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Cache and log files
+.cache/
+*.log
+
+# Build directories
+**/dist/
+**/build/

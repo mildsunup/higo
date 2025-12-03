@@ -17,20 +17,15 @@ import (
 
 // Config MySQL 配置
 type Config struct {
-	Name            string        `json:"name" yaml:"name"`
-	DSN             string        `json:"dsn" yaml:"dsn"`
-	Replicas        []string      `json:"replicas" yaml:"replicas"`
-	MaxOpenConns    int           `json:"max_open_conns" yaml:"max_open_conns"`
-	MaxIdleConns    int           `json:"max_idle_conns" yaml:"max_idle_conns"`
-	ConnMaxLifetime time.Duration `json:"conn_max_lifetime" yaml:"conn_max_lifetime"`
-	ConnMaxIdleTime time.Duration `json:"conn_max_idle_time" yaml:"conn_max_idle_time"`
-
-	// 日志配置
-	LogLevel      gormlogger.LogLevel `json:"log_level" yaml:"log_level"`           // 1=Silent, 2=Error, 3=Warn, 4=Info
-	SlowThreshold time.Duration       `json:"slow_threshold" yaml:"slow_threshold"` // 慢查询阈值，默认 200ms
-	Logger        Logger              // 自定义日志输出
-
-	Tracer trace.TracerProvider
+	Name            string              `json:"name" yaml:"name"`
+	DSN             string              `json:"dsn" yaml:"dsn"`
+	Replicas        []string            `json:"replicas" yaml:"replicas"`
+	MaxOpenConns    int                 `json:"max_open_conns" yaml:"max_open_conns"`
+	MaxIdleConns    int                 `json:"max_idle_conns" yaml:"max_idle_conns"`
+	ConnMaxLifetime time.Duration       `json:"conn_max_lifetime" yaml:"conn_max_lifetime"`
+	ConnMaxIdleTime time.Duration       `json:"conn_max_idle_time" yaml:"conn_max_idle_time"`
+	LogLevel        gormlogger.LogLevel `json:"log_level" yaml:"log_level"`           // 1=Silent, 2=Error, 3=Warn, 4=Info
+	SlowThreshold   time.Duration       `json:"slow_threshold" yaml:"slow_threshold"` // 慢查询阈值，默认 200ms
 }
 
 // Logger 日志接口
@@ -45,10 +40,36 @@ type Storage struct {
 	*storage.Base
 	db     *gorm.DB
 	config Config
+	logger Logger
+	tracer trace.TracerProvider
+}
+
+// Option MySQL 存储选项
+type Option func(*Storage)
+
+// WithLogger 设置日志
+func WithLogger(logger Logger) Option {
+	return func(s *Storage) {
+		s.logger = logger
+	}
+}
+
+// WithTracer 设置追踪
+func WithTracer(tracer trace.TracerProvider) Option {
+	return func(s *Storage) {
+		s.tracer = tracer
+	}
+}
+
+// WithReplicas 设置只读副本
+func WithReplicas(replicas ...string) Option {
+	return func(s *Storage) {
+		s.config.Replicas = replicas
+	}
 }
 
 // New 创建 MySQL 存储
-func New(cfg Config) *Storage {
+func New(cfg Config, opts ...Option) *Storage {
 	name := cfg.Name
 	if name == "" {
 		name = "mysql"
@@ -56,10 +77,17 @@ func New(cfg Config) *Storage {
 	if cfg.SlowThreshold <= 0 {
 		cfg.SlowThreshold = 200 * time.Millisecond
 	}
-	return &Storage{
+
+	s := &Storage{
 		Base:   storage.NewBase(name, storage.TypeMySQL),
 		config: cfg,
 	}
+
+	for _, opt := range opts {
+		opt(s)
+	}
+
+	return s
 }
 
 func (s *Storage) Connect(ctx context.Context) error {
@@ -69,8 +97,8 @@ func (s *Storage) Connect(ctx context.Context) error {
 
 	// 创建 GORM logger
 	var gormLog gormlogger.Interface
-	if s.config.Logger != nil {
-		gormLog = newSlowQueryLogger(s.config.Logger, s.config.SlowThreshold, s.config.LogLevel)
+	if s.logger != nil {
+		gormLog = newSlowQueryLogger(s.logger, s.config.SlowThreshold, s.config.LogLevel)
 	} else {
 		gormLog = gormlogger.Default.LogMode(s.config.LogLevel)
 	}
@@ -86,9 +114,9 @@ func (s *Storage) Connect(ctx context.Context) error {
 	}
 
 	// OpenTelemetry 追踪
-	if s.config.Tracer != nil {
+	if s.tracer != nil {
 		if err := db.Use(tracing.NewPlugin(
-			tracing.WithTracerProvider(s.config.Tracer),
+			tracing.WithTracerProvider(s.tracer),
 		)); err != nil {
 			s.SetState(storage.StateDisconnected)
 			return fmt.Errorf("mysql: setup tracing failed: %w", err)
